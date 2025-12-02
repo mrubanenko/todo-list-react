@@ -1,23 +1,25 @@
-import { useState } from "react";
+export const TodoItem = ({ todo, onDelete, onToggleComplete }) => {
 
-export const TodoItem = ({ todo, onDelete }) => {
+    const handleToggle = () => {
+        onToggleComplete(todo.id)
+    }
 
-    const[isCompleted, setIsCompleted] = useState(false);
+    console.log(todo);
     
     return(
         <div className="group flex items-center justify-between p-4 gap-3 bg-white dark:bg-page-dark
         rounded-lg h-12 shadow-sm hover:shadow-md border border-gray-200">
             <div className="flex items-center gap-3">
-                <button onClick={() => setIsCompleted(!isCompleted)}
+                <button onClick={handleToggle}
                     className={`p-1 rounded-full border-2 cursor-pointer
-                    ${isCompleted 
+                    ${todo.completed
                     ? "border-green-300 bg-green-300" 
                     : "border-gray-400 hover:border-gray-400"} 
                     transition-colors duration-100`}>
                          <svg
                             xmlns="http://www.w3.org/2000/svg"
                             className={`h-3 w-3 ${
-                            isCompleted ? "text-white" : "text-transparent"
+                            todo.completed ? "text-white" : "text-transparent"
                             }`}
                             fill="none"
                             viewBox="0 0 24 24"
@@ -31,9 +33,13 @@ export const TodoItem = ({ todo, onDelete }) => {
                             />
           </svg>
                     </button>
-                <span className={`text-1 ${isCompleted ? 
+                <span className={`text-1 ${todo.completed ? 
                     "line-through text-gray-400" 
-                    : "text-gray-700 dark:text-gray-300"}  `}>{todo.text}</span>
+                    : "text-gray-700 dark:text-gray-300"}  `}>
+                        {todo.text}</span> 
+                        {todo.deadline && ( <span className={`text-xs ${todo.completed ? "text-green-300" : new Date(todo.deadline) < new Date() ? "text-red-500" : "text-blue-300"}`}>
+                             {new Date(todo.deadline).toLocaleString("en-US")}
+                        </span> )}
             </div>
             <button onClick={() => onDelete(todo.id)} className="opacity-0 group-hover:opacity-100 
             text-gray-400 hover:text-red-500 dark:text-white cursor-pointer
