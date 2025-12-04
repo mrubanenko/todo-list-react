@@ -1,12 +1,25 @@
-export const TodoItem = ({ todo, onDelete, onToggleComplete }) => {
+import { useCallback, useState } from "react";
+
+export const TodoItem = ({ todo, onDelete, onToggleComplete, onUpdate }) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editText, setEditText] = useState(todo.text);
+  const [editDeadline, setEditDeadline] = useState(todo.deadline || "");
+
   const handleToggle = () => {
     onToggleComplete(todo.id);
   };
 
+  const handleSave = useCallback(() => {
+    if (editText.trim()) {
+      onUpdate(todo.id, editText, editDeadline);
+    }
+    setIsEditing(false);
+  }, [editText, editDeadline, todo.id, onUpdate]);
+
   return (
     <div
       className="group flex items-center justify-between p-4 gap-3 bg-white dark:bg-page-dark
-        rounded-lg h-12 shadow-sm hover:shadow-md border border-gray-200"
+        rounded-lg shadow-sm hover:shadow-md border border-gray-200"
     >
       <div className="flex items-center gap-3">
         <button
@@ -36,27 +49,59 @@ export const TodoItem = ({ todo, onDelete, onToggleComplete }) => {
             />
           </svg>
         </button>
-        <span
-          className={`text-1 ${
-            todo.completed
-              ? "line-through text-gray-400"
-              : "text-gray-700 dark:text-gray-300"
-          }  `}
-        >
-          {todo.text}
-        </span>
-        {todo.deadline && (
-          <span
-            className={`text-xs ${
-              todo.completed
-                ? "text-green-300"
-                : new Date(todo.deadline) < new Date()
-                ? "text-red-500"
-                : "text-blue-300"
-            }`}
+        {isEditing ? (
+          <div className="flex flex-col w-full gap-1 items-stretch">
+            <input
+              type="text"
+              value={editText}
+              onChange={(e) => setEditText(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSave()}
+              className="w-full px-2 py-1 border-2 border-blue-300 rounded text-sm text-gray700 dark:text-gray-300"
+            />
+
+            <div className="flex flex-col sm:flex-row gap-2 w-full">
+              <input
+                type="datetime-local"
+                value={editDeadline}
+                onChange={(e) => setEditDeadline(e.target.value)}
+                className="w-full sm:flex-1 px-2 py-1 border-2 border-blue-300 rounded text-sm text-gray700 dark:text-gray-300"
+              />
+              <button
+                onClick={handleSave}
+                className="flex items-center justify-center gap-1 px-2 py-1 sm:px-3 sm:py-1 text-green-500 hover:text-green-600 cursor-pointer border rounded hover:bg-green-50 transition-colors text-sm"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div
+            className="flex flex-col gap-1 cursor-pointer"
+            onDoubleClick={() => setIsEditing(true)}
           >
-            {new Date(todo.deadline).toLocaleString("en-US")}
-          </span>
+            <span
+              className={`text-1 ${
+                todo.completed
+                  ? "line-through text-gray-400"
+                  : "text-gray-700 dark:text-gray-300"
+              }  `}
+            >
+              {todo.text}
+            </span>
+            {todo.deadline && (
+              <span
+                className={`text-xs ${
+                  todo.completed
+                    ? "text-green-300"
+                    : new Date(todo.deadline) < new Date()
+                    ? "text-red-500"
+                    : "text-blue-300"
+                }`}
+              >
+                {new Date(todo.deadline).toLocaleString("en-US")}
+              </span>
+            )}
+          </div>
         )}
       </div>
       <button
